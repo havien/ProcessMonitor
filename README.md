@@ -7,6 +7,6 @@ Windowsのシステムの中で実行しているターゲットプロセスを�
 Made in C# (NET Framework 4.0)<br />
 Visual Studio 2010/2013.<p>
 
-Copyright (c) 2014 Pyo Ji Yeol(antrigic@gmail.com)<br />
+Copyright (c) 2014 Pyo-Ji-YeoL(antrigic@gmail.com)<br />
 Distributed under <a href="http://opensource.org/licenses/MIT">MIT License.</a> <br />
 <p>
