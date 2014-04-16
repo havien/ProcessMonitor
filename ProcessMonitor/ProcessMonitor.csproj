@@ -81,6 +81,7 @@
     <Compile Include="ProcessListForm.Designer.cs">
       <DependentUpon>ProcessListForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ProcessMonitorManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
     <EmbeddedResource Include="Form1.resx">
