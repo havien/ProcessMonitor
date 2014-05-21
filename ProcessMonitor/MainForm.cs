@@ -9,32 +9,33 @@ using System.Windows.Forms;
 
 namespace ProcessMonitor
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         public ProcessMonitorManager m_ProcessMonitorManager = new ProcessMonitorManager();
         private static string m_TempText = string.Empty;
+        private static string m_ProgramName = "ProcessMonitor";
 
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new MainForm());
         }
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             notifyIcon1.Visible = false;
 
-            Form1 thisFrom = (Form1)this;
+            MainForm thisFrom = (MainForm)this;
             m_ProcessMonitorManager.SetMainForm(ref thisFrom);
 
             m_TempText = String.Format("[{0}] {1}", AprilUtility.GetCorrentTimeString(), "Started ProcessMonitor!\n");
             AppendToMainTextBox(ref m_TempText);
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void MainForm_Load(object sender, EventArgs e)
         {
             contextMenuStrip1.Hide();
             notifyIcon1.ContextMenuStrip = contextMenuStrip1;
@@ -57,7 +58,7 @@ namespace ProcessMonitor
             }
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void MainForm_Closing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
             HideFromAndVisibleTray();
@@ -97,16 +98,16 @@ namespace ProcessMonitor
         {
             ProcessListForm processform = new ProcessListForm();
             processform.Owner = this;
-            processform.Show();
+            processform.ShowDialog();
         }
 
         public void SetTrayNotifyBalloonTip()
         {
             notifyIcon1.Icon = SystemIcons.WinLogo;
-            notifyIcon1.BalloonTipTitle = "Process Monitor";
+            notifyIcon1.BalloonTipTitle = m_ProgramName;
             notifyIcon1.BalloonTipText = "None.";
             notifyIcon1.BalloonTipIcon = ToolTipIcon.None;
-            notifyIcon1.Text = "Process Monitor!";
+            notifyIcon1.Text = m_ProgramName + ", First Version";
         }
 
         public void HideFromAndVisibleTray()
@@ -145,12 +146,7 @@ namespace ProcessMonitor
         {
             notifyIcon1.Visible = false;
             this.Dispose();
-            Application.Exit();
+            System.Environment.Exit(1);
         }
-
-        //public ProcessMonitorManager GetProcessMonitorManager()
-        //{
-        //    return m_ProcessMonitorManager;
-        //}
     }
 }

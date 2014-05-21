@@ -54,7 +54,7 @@ namespace ProcessMonitor
     public class ProcessMonitorManager
     {
         #region Variables
-        Form1 m_MainForm;
+        MainForm m_MainForm;
         public ProcessInfo m_TargetProcessInfo;
         private bool m_ExistPrevMonitorProcess = false;
         private volatile bool m_RunningMonitorProcess = false;
@@ -75,7 +75,7 @@ namespace ProcessMonitor
         }
 
         #endregion
-        public void SetMainForm(ref Form1 mainform)
+        public void SetMainForm(ref MainForm mainform)
         {
             m_MainForm = mainform;
         }
@@ -141,7 +141,7 @@ namespace ProcessMonitor
         private static void MonitorProcessWorker(object Args)
         {
             ProcessMonitorManager CurrentObject = (ProcessMonitorManager)Args;
-            Form1 CurrentForm = CurrentObject.m_MainForm;
+            MainForm CurrentForm = CurrentObject.m_MainForm;
             CurrentObject.m_MainForm.PrintAndWriteFileWithTime("Entry MonitorProcessWorker Thread.");
 
             while (true == CurrentObject._RunningMonitorThread)

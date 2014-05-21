@@ -13,7 +13,7 @@ namespace ProcessMonitor
 {
     public partial class ProcessListForm : Form
     {
-        private Form1 m_OwnerForm = null;
+        private MainForm m_OwnerForm = null;
         private ProcessMonitorManager m_ProcessMonitorManager = null;
         private static string m_TempText = string.Empty;
 
@@ -25,7 +25,7 @@ namespace ProcessMonitor
         private void ProcessListForm_Load(object sender, EventArgs e)
         {
             InitProcessListView(ref this.listView1);
-            m_OwnerForm = (Form1)this.Owner;
+            m_OwnerForm = (MainForm)this.Owner;
             m_ProcessMonitorManager = m_OwnerForm.m_ProcessMonitorManager;
 
             PrintAndWriteFileWithTime("Start Process List Dialog..!");
