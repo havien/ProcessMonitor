@@ -13,11 +13,41 @@ namespace ProcessMonitor
 {
     public partial class ProcessListForm : Form
     {
-        private Form1 m_OwnerForm = null;
+        private MainForm m_OwnerForm = null;
+        private ProcessMonitorManager m_ProcessMonitorManager = null;
+        private static string m_TempText = string.Empty;
 
         public ProcessListForm()
         {
             InitializeComponent();
+        }
+
+        private void ProcessListForm_Load(object sender, EventArgs e)
+        {
+            //if (false == AprilUtility.g_CreatedLogDir)
+            //{
+            //    string LogDir = AprilUtility.g_LogDirName;
+            //    AprilUtility.CreateDirectory(ref LogDir);
+            //    AprilUtility.g_CreatedLogDir = true;
+            //}
+
+            InitProcessListView(ref this.listView1);
+            m_OwnerForm = (MainForm)this.Owner;
+            m_ProcessMonitorManager = m_OwnerForm.m_ProcessMonitorManager;
+
+            PrintAndWriteFileWithTime("Start Process List Dialog..!");
+        }
+
+        private void InitProcessListView(ref ListView TargetListView)
+        {
+            TargetListView.FullRowSelect = true;
+            AddListViewColumns(ref TargetListView);
+
+            TargetListView.Update();
+            TargetListView.View = View.Details;
+            AddProcessInfo(ref TargetListView);
+
+            TargetListView.EndUpdate();
         }
 
         public void AppendToMainTextBox( string Text )
@@ -82,27 +112,7 @@ namespace ProcessMonitor
         public void SetTargetMonitorProcessInfo(ListViewItem.ListViewSubItemCollection subItem)
         {
             string[] names = { subItem[0].Text, subItem[1].Text, subItem[2].Text };
-            m_OwnerForm.SetTargetMonitorProcessInfo(ref names[0], ref names[1], ref names[2]);
-        }
-
-        private void InitProcessListView(ref ListView TargetListView)
-        {
-            TargetListView.FullRowSelect = true;
-            AddListViewColumns(ref TargetListView);
-
-            TargetListView.Update();
-            TargetListView.View = View.Details;
-            AddProcessInfo(ref TargetListView);
-
-            TargetListView.EndUpdate();
-        }
-
-        private void ProcessListForm_Load(object sender, EventArgs e)
-        {
-            InitProcessListView(ref this.listView1);
-            m_OwnerForm = (Form1)this.Owner;
-
-            PrintAndWriteFileWithTime("Start ProcessMonitor..");
+            m_ProcessMonitorManager.SetTargetMonitorProcessInfo(ref names[0], ref names[1], ref names[2]);
         }
 
         private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -129,47 +139,45 @@ namespace ProcessMonitor
             listView1.Sort();
         }
 
-        private void StartMonitorProcessWorkerThread()
-        {
-            m_OwnerForm.StartMonitorProcessWorkerThread();
-        }
-
         private void listView1_MouseClick(object sender, MouseEventArgs e)
         {
             ListViewHitTestInfo HitTestInfo = listView1.HitTest(e.X, e.Y);
 
             if( "" != HitTestInfo.Item.Text )
             {
-                if( true == m_OwnerForm.m_RunningMonitorProcess )
+                if( true == m_ProcessMonitorManager.RunningMonitorProcess )
                 {
-                    string Question = String.Format("Already Monitor Process [{0}], Change to this Process [{1}] ?",
-                                                    m_OwnerForm.GetTargetMonitorProcessName(), HitTestInfo.Item.Text);
-                    DialogResult DlgResult = MessageBox.Show(Question, "Question ?", MessageBoxButtons.YesNo);
+                    m_TempText = String.Format("Already Monitor Process [{0}], Change to this Process [{1}] ?",
+                                                    m_ProcessMonitorManager.m_TargetProcessInfo.Name, HitTestInfo.Item.Text);
+                    DialogResult DlgResult = MessageBox.Show(m_TempText, "Question ?", MessageBoxButtons.YesNo);
                     if (DialogResult.Yes == DlgResult)
                     {
-                        PrintAndWriteFileWithTime(Question);
+                        PrintAndWriteFileWithTime(m_TempText);
 
-                        string Info = String.Format("Start Process Monitor [{0}]!!!!!!", HitTestInfo.Item.Text);
-                        PrintAndWriteFileWithTime(Info);
+                        m_TempText = String.Format("Start Process Monitor [{0}]!!!!!!", HitTestInfo.Item.Text);
+                        PrintAndWriteFileWithTime(m_TempText);
+
+                        // save process info to Settings.
+                        m_ProcessMonitorManager.SaveMonitorProcessInfo();
 
                         SetTargetMonitorProcessInfo(HitTestInfo.Item.SubItems);
-                        m_OwnerForm.PrintTargetMonitorProcessInfo();
+                        m_ProcessMonitorManager.PrintTargetMonitorProcessInfo();
+                        
 
                         PrintAndWriteFileWithTime("Try to Start MonitorProcessWorker");                        
-                        if( true == m_OwnerForm._RunningMonitorThread )
+                        if( true == m_ProcessMonitorManager._RunningMonitorThread )
                         {
                             PrintAndWriteFileWithTime("Already Running MonitorProcessWorker Thread!");
                         }
                         else
                         {
-                            StartMonitorProcessWorkerThread();
+                            m_ProcessMonitorManager.StartMonitorProcessWorkerThread();
                             PrintAndWriteFileWithTime("Success to Start MonitorProcessWorker");
                         }
 
-                        string strText = String.Format("{0}|{1}", HitTestInfo.Item.SubItems[0].Text,
+                        m_TempText = String.Format("{0}|{1}", HitTestInfo.Item.SubItems[0].Text,
                                                                 HitTestInfo.Item.SubItems[2].Text);
 
-                        AprilUtility.WriteToFile(ref AprilUtility.g_ProcessLogFileName, strText);
 
                         this.WindowState = FormWindowState.Minimized;
                         this.Visible = false;
@@ -181,23 +189,21 @@ namespace ProcessMonitor
                 }
                 else
                 {
-                    string Question = String.Format("Start Monitor [{0}] ?", HitTestInfo.Item.Text);
-                    DialogResult DlgResult = MessageBox.Show(Question, "Question ?", MessageBoxButtons.YesNo);
+                    m_TempText = String.Format("Start Monitor [{0}] ?", HitTestInfo.Item.Text);
+                    DialogResult DlgResult = MessageBox.Show(m_TempText, "Question ?", MessageBoxButtons.YesNo);
                     if (DialogResult.Yes == DlgResult)
                     {
-                        string Info = String.Format("Start Process Monitor [{0}]", HitTestInfo.Item.Text);
-                        PrintAndWriteFileWithTime(Info);
+                        m_TempText = String.Format("Start Process Monitor [{0}]", HitTestInfo.Item.Text);
+                        PrintAndWriteFileWithTime(m_TempText);
 
                         string [] CurMonitorProcessInfo = {HitTestInfo.Item.SubItems[0].Text, 
                                                            HitTestInfo.Item.SubItems[1].Text,
                                                           HitTestInfo.Item.SubItems[2].Text};
 
-                        m_OwnerForm.SetTargetMonitorProcessInfo(ref CurMonitorProcessInfo);
+                        m_ProcessMonitorManager.SetTargetMonitorProcessInfo(ref CurMonitorProcessInfo);
 
                         PrintAndWriteFileWithTime("Try to Start MonitorProcessWorker");
-
-                        StartMonitorProcessWorkerThread();
-
+                        m_ProcessMonitorManager.StartMonitorProcessWorkerThread();
                         PrintAndWriteFileWithTime("Success to Start MonitorProcessWorker");
                     }
                     else if (DialogResult.No == DlgResult)

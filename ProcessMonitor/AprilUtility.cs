@@ -8,9 +8,11 @@ namespace ProcessMonitor
 {
     public class AprilUtility
     {
-        public static string g_LogDirName = ".\\logs";
+        public static bool g_CreatedLogDir = false;
+        public static string g_LogDirName = "..\\..\\..\\logs";
         public static string g_LogFileName = "\\MonitorProcess_log.txt";
-        public static string g_ProcessLogFileName = "\\MonitorProcess.txt";
+        public static FileStream g_LogFileStream;
+        //public static string g_ProcessLogFileName = "\\MonitorProcess.txt";
 
         /******************************************************
          * Time
@@ -39,10 +41,15 @@ namespace ProcessMonitor
 
         public static void CreateDirectory(ref string DirName)
         {
-            System.IO.Directory.CreateDirectory(DirName);
-
-            g_ProcessLogFileName = g_LogDirName + g_ProcessLogFileName;
-            g_LogFileName = g_LogDirName + g_LogFileName;
+            try
+            {
+                DirectoryInfo NewDir = System.IO.Directory.CreateDirectory(DirName);
+                g_LogFileName = g_LogDirName + g_LogFileName;
+            }
+            catch (System.Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.Message);
+            }
         }
         
         public static void CreateNewFile(ref string FileName)
@@ -80,24 +87,39 @@ namespace ProcessMonitor
 
         public static void WriteToFile(ref string FileName, string Comment)
         {
-            using (FileStream WriteStream = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write))
+            try
             {
-                StreamWriter Writer = new StreamWriter(WriteStream);
-                //WriteStream.Seek(0, SeekOrigin.End);
-                Writer.WriteLine(Comment);
-                Writer.Close();
+                using (FileStream WriteStream = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write))
+                {
+                    StreamWriter Writer = new StreamWriter(WriteStream);
+                    //WriteStream.Seek(0, SeekOrigin.End);
+                    Writer.WriteLine(Comment);
+                    Writer.Close();
+                }
+            }
+            catch (System.Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.Message);
             }
         }
 
         public static void WriteToFileEnd(ref string FileName, string Comment)
         {
-            using (FileStream WriteStream = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write))
+            try
             {
-                StreamWriter Writer = new StreamWriter(WriteStream);
-                WriteStream.Seek(0, SeekOrigin.End);
-                Writer.WriteLine(Comment);
-                Writer.Close();
+                using (FileStream WriteStream = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write))
+                {
+                    StreamWriter Writer = new StreamWriter(WriteStream);
+                    WriteStream.Seek(0, SeekOrigin.End);
+                    Writer.WriteLine(Comment);
+                    Writer.Close();
+                }
             }
+            catch (System.Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.Message);
+            }
+            
         }
     }
 }
