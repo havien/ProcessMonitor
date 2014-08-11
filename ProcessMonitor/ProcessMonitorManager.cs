@@ -181,7 +181,11 @@ namespace ProcessMonitor
                     if( true == CurrentObject.m_RunningMonitorProcess )
                     {
                         string InfoText = String.Format("Process {0} is Running!!!", CurrentObject.m_TargetProcessInfo.Name);
+<<<<<<< HEAD
                         //AprilUtility.WriteToFileWithTime(ref AprilUtility.g_LogFileName, InfoText);
+=======
+                        AprilUtility.WriteToFileWithTime(ref AprilUtility.g_LogFileName, InfoText);
+>>>>>>> 93c91b61aea1f58d10c9c422a9ee08a27a38f8a7
                     }
                     else if (false == CurrentObject.m_RunningMonitorProcess)
                     {

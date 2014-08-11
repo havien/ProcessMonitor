@@ -24,6 +24,7 @@ namespace ProcessMonitor
 
         private void ProcessListForm_Load(object sender, EventArgs e)
         {
+<<<<<<< HEAD
             //if (false == AprilUtility.g_CreatedLogDir)
             //{
             //    string LogDir = AprilUtility.g_LogDirName;
@@ -31,6 +32,8 @@ namespace ProcessMonitor
             //    AprilUtility.g_CreatedLogDir = true;
             //}
 
+=======
+>>>>>>> 93c91b61aea1f58d10c9c422a9ee08a27a38f8a7
             InitProcessListView(ref this.listView1);
             m_OwnerForm = (MainForm)this.Owner;
             m_ProcessMonitorManager = m_OwnerForm.m_ProcessMonitorManager;
@@ -178,6 +181,10 @@ namespace ProcessMonitor
                         m_TempText = String.Format("{0}|{1}", HitTestInfo.Item.SubItems[0].Text,
                                                                 HitTestInfo.Item.SubItems[2].Text);
 
+<<<<<<< HEAD
+=======
+                        AprilUtility.WriteToFile(ref AprilUtility.g_ProcessLogFileName, m_TempText);
+>>>>>>> 93c91b61aea1f58d10c9c422a9ee08a27a38f8a7
 
                         this.WindowState = FormWindowState.Minimized;
                         this.Visible = false;
