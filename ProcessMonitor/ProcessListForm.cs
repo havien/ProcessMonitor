@@ -24,16 +24,6 @@ namespace ProcessMonitor
 
         private void ProcessListForm_Load(object sender, EventArgs e)
         {
-<<<<<<< HEAD
-            //if (false == AprilUtility.g_CreatedLogDir)
-            //{
-            //    string LogDir = AprilUtility.g_LogDirName;
-            //    AprilUtility.CreateDirectory(ref LogDir);
-            //    AprilUtility.g_CreatedLogDir = true;
-            //}
-
-=======
->>>>>>> 93c91b61aea1f58d10c9c422a9ee08a27a38f8a7
             InitProcessListView(ref this.listView1);
             m_OwnerForm = (MainForm)this.Owner;
             m_ProcessMonitorManager = m_OwnerForm.m_ProcessMonitorManager;
@@ -96,7 +86,7 @@ namespace ProcessMonitor
                 catch (Win32Exception w)
                 {
                     CurItem.SubItems.Add("");
-                    PrintAndWriteFileWithTime(w.Message);
+                    //PrintAndWriteFileWithTime(w.Message);
                 }
 
                 CurItem.ImageIndex = 0;
@@ -115,7 +105,7 @@ namespace ProcessMonitor
         public void SetTargetMonitorProcessInfo(ListViewItem.ListViewSubItemCollection subItem)
         {
             string[] names = { subItem[0].Text, subItem[1].Text, subItem[2].Text };
-            m_ProcessMonitorManager.SetTargetMonitorProcessInfo(ref names[0], ref names[1], ref names[2]);
+            m_ProcessMonitorManager.SetTargetMonitorProcessInfo(names[0], names[1], names[2]);
         }
 
         private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -181,10 +171,7 @@ namespace ProcessMonitor
                         m_TempText = String.Format("{0}|{1}", HitTestInfo.Item.SubItems[0].Text,
                                                                 HitTestInfo.Item.SubItems[2].Text);
 
-<<<<<<< HEAD
-=======
-                        AprilUtility.WriteToFile(ref AprilUtility.g_ProcessLogFileName, m_TempText);
->>>>>>> 93c91b61aea1f58d10c9c422a9ee08a27a38f8a7
+                        //AprilUtility.WriteToFile(ref AprilUtility.g_ProcessLogFileName, m_TempText);
 
                         this.WindowState = FormWindowState.Minimized;
                         this.Visible = false;

@@ -16,9 +16,6 @@ namespace ProcessMonitor
 
         public ProcessInfo()
         {
-            //m_Name = string.Empty;
-            //m_ID = string.Empty;
-            //m_FullPath = string.Empty;
         }
 
         #region property.
@@ -61,7 +58,7 @@ namespace ProcessMonitor
         public static Process g_TargetProcess;
         #endregion
 
-        #region Property.
+        #region Property
         public bool ExistPrevMonitorProcess
         {
             get { return m_ExistPrevMonitorProcess; }
@@ -93,11 +90,6 @@ namespace ProcessMonitor
         public void SetTargetMonitorProcessInfo(ref string[] ProcessInfo)
         {
             m_TargetProcessInfo.SetValues(ProcessInfo[0], ProcessInfo[1], ProcessInfo[2]);
-        }
-
-        public void SetTargetMonitorProcessInfo(ref string Name, ref string ID, ref string FullPath)
-        {
-            m_TargetProcessInfo.SetValues(Name, ID, FullPath);
         }
 
         public void SetTargetMonitorProcessInfo( string Name, string ID, string FullPath)
@@ -153,27 +145,33 @@ namespace ProcessMonitor
                     Process[] Processlist = Process.GetProcesses();
                     foreach (Process CurProcess in Processlist)
                     {
+                        // FullPath로 확인한다. 이름이 같아도 FullPath가 다르면 별개의 프로세스로 판단한다.
                         if (true == CurrentObject.m_ExistPrevMonitorProcess && CurProcess.ProcessName == CurrentObject.m_TargetProcessInfo.Name)
                         {
-                            g_TargetProcess = CurProcess;
-                            CurrentObject.m_RunningMonitorProcess = true;
-                            CurrentObject.SaveMonitorProcessInfo(g_TargetProcess);
-                            break;
+                            string curProcessFullPath = CurProcess.Modules[0].FileName;
+                            if (0 == string.Compare(curProcessFullPath, CurrentObject.m_TargetProcessInfo.FullPath))
+                            {
+                                g_TargetProcess = CurProcess;
+                                CurrentObject.m_RunningMonitorProcess = true;
+                                CurrentObject.SaveMonitorProcessInfo(g_TargetProcess);
+                                
+                                break;
+                            }
                         }
                         else
                         {
-                            if (CurProcess.Id.ToString() == CurrentObject.m_TargetProcessInfo.ID && CurProcess.ProcessName == CurrentObject.m_TargetProcessInfo.Name)
+                            if (CurProcess.ProcessName == CurrentObject.m_TargetProcessInfo.Name)
                             {
-                                // Running Process is true.
-                                g_TargetProcess = CurProcess;
-                                CurrentObject.m_RunningMonitorProcess = true;
+                                string curProcessFullPath = CurProcess.Modules[0].FileName;
+                                if (0 == string.Compare(curProcessFullPath, CurrentObject.m_TargetProcessInfo.FullPath))
+                                {
+                                    // Running Process is true.
+                                    g_TargetProcess = CurProcess;
+                                    CurrentObject.m_RunningMonitorProcess = true;
 
-                                CurrentObject.SaveMonitorProcessInfo(g_TargetProcess);
-                                break;
-                            }
-                            else
-                            {
-                                //CurrentObject.m_RunningMonitorProcess = false;
+                                    CurrentObject.SaveMonitorProcessInfo(g_TargetProcess);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -181,11 +179,6 @@ namespace ProcessMonitor
                     if( true == CurrentObject.m_RunningMonitorProcess )
                     {
                         string InfoText = String.Format("Process {0} is Running!!!", CurrentObject.m_TargetProcessInfo.Name);
-<<<<<<< HEAD
-                        //AprilUtility.WriteToFileWithTime(ref AprilUtility.g_LogFileName, InfoText);
-=======
-                        AprilUtility.WriteToFileWithTime(ref AprilUtility.g_LogFileName, InfoText);
->>>>>>> 93c91b61aea1f58d10c9c422a9ee08a27a38f8a7
                     }
                     else if (false == CurrentObject.m_RunningMonitorProcess)
                     {
@@ -196,7 +189,46 @@ namespace ProcessMonitor
                         strText = String.Format("Start Running Process!! [{0}], {1}]", CurrentObject.m_TargetProcessInfo.FullPath, CurrentObject.m_TargetProcessInfo.Name);
                         CurrentForm.PrintAndWriteFileWithTime(strText);
 
+                        string titleBarText = string.Format("{0}", CurrentObject.m_TargetProcessInfo.FullPath);
+                        CurrentForm.AppendToMainTitleBarText(ref titleBarText);
+                        
+                        string WorkingDirectory = System.IO.Directory.GetCurrentDirectory();
+
+                        string PathReplace = CurrentObject.m_TargetProcessInfo.FullPath.Replace(CurrentObject.m_TargetProcessInfo.Name, "");
+                        string PathOnly = PathReplace.Replace(".exe", "");
+
+                        System.IO.Directory.SetCurrentDirectory(PathOnly);
                         Process MonitorProcess = Process.Start(CurrentObject.m_TargetProcessInfo.FullPath);
+
+
+                        if( true == System.IO.Directory.Exists( Properties.Settings.Default.SendMailDir) )
+                        {
+                            CurrentForm.PrintAndWriteFileWithTime("Send mail to Developer's Using python");
+
+                            // 서버가 죽었다고 메일을 보낸다. sendmail.py를 활용한다.
+                            string mailSubject = string.Format("\"Crash Server Process {0}({1})\"",
+                                                                CurrentObject.m_TargetProcessInfo.FullPath,
+                                                                CurrentObject.m_TargetProcessInfo.Name);
+
+
+                            string sendMailProcessName = "C:\\Python27\\python.exe";
+
+                            ProcessStartInfo pythonProcessInfo = new ProcessStartInfo();
+                            pythonProcessInfo.CreateNoWindow = true;
+                            pythonProcessInfo.UseShellExecute = false;
+                            pythonProcessInfo.FileName = sendMailProcessName;
+                            pythonProcessInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                            pythonProcessInfo.Arguments =  "SendMail.py " + mailSubject;
+                            using (Process SendMailProcess = Process.Start(pythonProcessInfo))
+                            {
+                                SendMailProcess.WaitForExit();
+                            }
+
+                            CurrentForm.PrintAndWriteFileWithTime("Complete to Send ");
+                        }
+
+                        
+                        System.IO.Directory.SetCurrentDirectory(WorkingDirectory);
                         if (MonitorProcess.ProcessName == CurrentObject.m_TargetProcessInfo.Name)
                         {
                             CurrentObject.SaveMonitorProcessInfo(MonitorProcess);

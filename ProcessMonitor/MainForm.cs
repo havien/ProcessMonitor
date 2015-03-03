@@ -14,10 +14,6 @@ namespace ProcessMonitor
         public ProcessMonitorManager m_ProcessMonitorManager = new ProcessMonitorManager();
         private static string m_TempText = string.Empty;
         private static string m_ProgramName = "ProcessMonitor";
-<<<<<<< HEAD
-        //private bool m_UseLogFile = false;
-=======
->>>>>>> 93c91b61aea1f58d10c9c422a9ee08a27a38f8a7
 
         [STAThread]
         static void Main()
@@ -46,12 +42,6 @@ namespace ProcessMonitor
 
             if (string.Empty != Properties.Settings.Default.MonitorProcessName)
             {
-<<<<<<< HEAD
-                //String.Format(AprilUtility.g_LogFileFullName, "%s%s", AprilUtility.g_LogDirName, AprilUtility.g_LogFileName);
-                AprilUtility.CreateDirectory(ref AprilUtility.g_LogDirName);
-
-=======
->>>>>>> 93c91b61aea1f58d10c9c422a9ee08a27a38f8a7
                 m_ProcessMonitorManager.SetTargetMonitorProcessInfo(Properties.Settings.Default.MonitorProcessName,
                                                                     "none",
                                                                     Properties.Settings.Default.MonitorProcessFullName);
@@ -88,6 +78,26 @@ namespace ProcessMonitor
                 else
                 {
                     richTextBox1.AppendText(Text);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK);
+            }
+        }
+
+        public void AppendToMainTitleBarText(ref string Text)
+        {
+            try
+            {
+                if (this.InvokeRequired)
+                {
+                    AvoidCrossThreadDelegateRichTextBox tempDelegate = new AvoidCrossThreadDelegateRichTextBox(AppendToMainTitleBarText);
+                    this.Invoke(tempDelegate, Text);
+                }
+                else
+                {
+                    this.Text = Text;
                 }
             }
             catch (System.Exception ex)

@@ -52,10 +52,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(950, 677);
             this.Controls.Add(this.listView1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
             this.Name = "ProcessListForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ProcessListForm";
             this.Load += new System.EventHandler(this.ProcessListForm_Load);
             this.ResumeLayout(false);

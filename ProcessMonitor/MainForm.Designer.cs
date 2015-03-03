@@ -99,7 +99,7 @@
             this.exitxToolStripMenuItem.Text = "Exit(&x)";
             this.exitxToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_ClickExit);
             // 
-            // MainForm
+            // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -107,8 +107,7 @@
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
-            this.Name = "MainForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Name = "Form1";
             this.Text = "Process Monitor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_Closing);
             this.Load += new System.EventHandler(this.MainForm_Load);
