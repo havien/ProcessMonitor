@@ -11,16 +11,17 @@ namespace ProcessMonitor
 {
     public partial class MainForm : Form
     {
-        public ProcessMonitorManager m_ProcessMonitorManager = new ProcessMonitorManager();
-        private static string m_TempText = string.Empty;
-        private static string m_ProgramName = "ProcessMonitor";
+        public ProcessMonitorManager AppManager = new ProcessMonitorManager();
+
+        private static string tempText = string.Empty;
+        private static string ProgramName = "ProcessMonitor";
 
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            Application.Run( new MainForm() );
         }
 
         public MainForm()
@@ -29,10 +30,10 @@ namespace ProcessMonitor
             notifyIcon1.Visible = false;
 
             MainForm thisFrom = (MainForm)this;
-            m_ProcessMonitorManager.SetMainForm(ref thisFrom);
+            AppManager.SetMainForm(ref thisFrom);
 
-            m_TempText = String.Format("[{0}] {1}", AprilUtility.GetCorrentTimeString(), "Started ProcessMonitor!\n");
-            AppendToMainTextBox(ref m_TempText);
+            tempText = String.Format("[{0}] {1}", AprilUtility.GetCorrentTimeString(), "Started ProcessMonitor!\n");
+            AppendToMainTextBox(ref tempText);
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -40,21 +41,21 @@ namespace ProcessMonitor
             contextMenuStrip1.Hide();
             notifyIcon1.ContextMenuStrip = contextMenuStrip1;
 
-            if (string.Empty != Properties.Settings.Default.MonitorProcessName)
+            if( string.Empty != Properties.Settings.Default.MonitorProcessName )
             {
-                m_ProcessMonitorManager.SetTargetMonitorProcessInfo(Properties.Settings.Default.MonitorProcessName,
-                                                                    "none",
-                                                                    Properties.Settings.Default.MonitorProcessFullName);
+                AppManager.SetTargetMonitorProcessInfo( "none",
+                                                        Properties.Settings.Default.MonitorProcessName,
+                                                        Properties.Settings.Default.MonitorProcessFullName );
 
-                m_ProcessMonitorManager.ExistPrevMonitorProcess = true;
-                m_ProcessMonitorManager.StartMonitorProcessWorkerThread();
+                AppManager.ExistPrevMonitorProcess = true;
+                AppManager.StartMonitorProcessWorkerThread();
 
-                m_TempText = String.Format("Exist the Previously Monitored Process! [{0}]", m_ProcessMonitorManager.m_TargetProcessInfo.Name);
-                PrintAndWriteFileWithTime(m_TempText);
+                tempText = String.Format("Exist the Previously Monitored Process! [{0}]", AppManager.TargetProcessInfo.Name);
+                PrintAndWriteFileWithTime(tempText);
             }
             else
             {
-                m_ProcessMonitorManager.ExistPrevMonitorProcess = false;
+                AppManager.ExistPrevMonitorProcess = false;
             }
         }
 
@@ -72,7 +73,7 @@ namespace ProcessMonitor
             {
                 if (richTextBox1.InvokeRequired)
                 {
-                    AvoidCrossThreadDelegateRichTextBox tempDelegate = new AvoidCrossThreadDelegateRichTextBox(AppendToMainTextBox);
+                    var tempDelegate = new AvoidCrossThreadDelegateRichTextBox(AppendToMainTextBox);
                     richTextBox1.Invoke(tempDelegate, Text);
                 }
                 else
@@ -92,7 +93,7 @@ namespace ProcessMonitor
             {
                 if (this.InvokeRequired)
                 {
-                    AvoidCrossThreadDelegateRichTextBox tempDelegate = new AvoidCrossThreadDelegateRichTextBox(AppendToMainTitleBarText);
+                    var tempDelegate = new AvoidCrossThreadDelegateRichTextBox(AppendToMainTitleBarText);
                     this.Invoke(tempDelegate, Text);
                 }
                 else
@@ -111,7 +112,7 @@ namespace ProcessMonitor
             Text = String.Format("[{0}] {1}\n", AprilUtility.GetCorrentTimeString(), Text);
 
             AppendToMainTextBox(ref Text);
-            AprilUtility.WriteToFileWithTime(ref AprilUtility.g_LogFileName, Text);
+            AprilUtility.WriteToFileWithTime(ref AprilUtility.LogFileName, Text);
         }
 
         private void ShowProcessListDialog(object sender, EventArgs e)
@@ -124,10 +125,10 @@ namespace ProcessMonitor
         public void SetTrayNotifyBalloonTip()
         {
             notifyIcon1.Icon = SystemIcons.WinLogo;
-            notifyIcon1.BalloonTipTitle = m_ProgramName;
+            notifyIcon1.BalloonTipTitle = ProgramName;
             notifyIcon1.BalloonTipText = "None.";
             notifyIcon1.BalloonTipIcon = ToolTipIcon.None;
-            notifyIcon1.Text = m_ProgramName + ", First Version";
+            notifyIcon1.Text = ProgramName + ", First Version";
         }
 
         public void HideFromAndVisibleTray()
@@ -141,7 +142,7 @@ namespace ProcessMonitor
         public void HideTrayAndShowForm()
         {
             this.Visible = true;
-            if (FormWindowState.Minimized == this.WindowState)
+            if( FormWindowState.Minimized == this.WindowState )
             {
                 this.WindowState = FormWindowState.Normal;
                 this.Activate();
@@ -166,7 +167,7 @@ namespace ProcessMonitor
         {
             notifyIcon1.Visible = false;
             this.Dispose();
-            System.Environment.Exit(1);
+            System.Environment.Exit( 1 );
         }
     }
 }

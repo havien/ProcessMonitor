@@ -9,10 +9,9 @@ namespace ProcessMonitor
 {
     public class ProcessInfo
     {
-        private const string m_FileExtension = ".exe";
-        private string m_Name = string.Empty;
-        private string m_ID = string.Empty;
-        private string m_FullPath = string.Empty;
+        private string _name = string.Empty;
+        private string _identifier = string.Empty;
+        private string _fileFullPath = string.Empty;
 
         public ProcessInfo()
         {
@@ -21,28 +20,27 @@ namespace ProcessMonitor
         #region property.
         public string ID
         {
-            set { m_ID = value; }
-            get { return m_ID; }
+            set { _identifier = value; }
+            get { return _identifier; }
         }
 
         public string Name
         {
-            set { m_Name = value; }
-            get { return m_Name; }
+            set { _name = value; }
+            get { return _name; }
         }
 
         public string FullPath
         {
-            set { m_FullPath = value; }
-            get { return m_FullPath; }
+            set { _fileFullPath = value; }
+            get { return _fileFullPath; }
         }
 
-        public void SetValues(string Name, string ID, string FullPath)
+        public void SetValues( string identifier, string name, string fileFullPath )
         {
-            m_ID = ID;
-            //m_Name = string.Format("{0}{1}", Name, m_FileExtension);
-            m_Name = Name;
-            m_FullPath = FullPath;
+            _identifier = identifier;
+            _name = name;
+            _fileFullPath = fileFullPath;
         }
 
         #endregion
@@ -51,210 +49,222 @@ namespace ProcessMonitor
     public class ProcessMonitorManager
     {
         #region Variables
-        MainForm m_MainForm;
-        public ProcessInfo m_TargetProcessInfo;
-        private bool m_ExistPrevMonitorProcess = false;
-        private volatile bool m_RunningMonitorProcess = false;
-        public static Process g_TargetProcess;
+        MainForm _mainForm;
+
+        public ProcessInfo TargetProcessInfo;
+        public static Process TargetProcess;
+
+        private bool _existPrevMonitorProcess = false;
+        private volatile bool _runningMonitorProcess = false;
         #endregion
 
         #region Property
         public bool ExistPrevMonitorProcess
         {
-            get { return m_ExistPrevMonitorProcess; }
-            set { m_ExistPrevMonitorProcess = value; }
+            get { return _existPrevMonitorProcess; }
+            set { _existPrevMonitorProcess = value; }
         }
 
         public bool RunningMonitorProcess
         {
-            set { m_RunningMonitorProcess = true; }
-            get { return m_RunningMonitorProcess; }
+            set { _runningMonitorProcess = true; }
+            get { return _runningMonitorProcess; }
         }
 
         #endregion
         public void SetMainForm(ref MainForm mainform)
         {
-            m_MainForm = mainform;
+            _mainForm = mainform;
         }
 
         #region constructor
         public ProcessMonitorManager()
         {
-            m_TargetProcessInfo = new ProcessInfo();
+            TargetProcessInfo = new ProcessInfo();
         }
         #endregion
 
         /******************************************************
         * ProcessInfo.
         ******************************************************/
-        public void SetTargetMonitorProcessInfo(ref string[] ProcessInfo)
+        public void SetTargetMonitorProcessInfo( ref string[] ProcessInfo )
         {
-            m_TargetProcessInfo.SetValues(ProcessInfo[0], ProcessInfo[1], ProcessInfo[2]);
+            SetTargetMonitorProcessInfo( ProcessInfo[0], ProcessInfo[1], ProcessInfo[2] );
         }
 
-        public void SetTargetMonitorProcessInfo( string Name, string ID, string FullPath)
+        public void SetTargetMonitorProcessInfo( string identifier, string name, string fileFullPath )
         {
-            m_TargetProcessInfo.SetValues(Name, ID, FullPath);
+            TargetProcessInfo.SetValues( identifier, name, fileFullPath );
         }
 
         public void PrintTargetMonitorProcessInfo()
         {
-            string TempText = String.Format("m_TargetMonitorProcessName : {0}", m_TargetProcessInfo.Name);
-            m_MainForm.PrintAndWriteFileWithTime(TempText);
+            string tempText = String.Format("TargetMonitorProcessName : {0}", TargetProcessInfo.Name );
+            _mainForm.PrintAndWriteFileWithTime(tempText);
 
-            TempText = String.Format("m_TargetMonitorProcessID : {0}", m_TargetProcessInfo.ID);
-            m_MainForm.PrintAndWriteFileWithTime(TempText);
+            tempText = String.Format("TargetMonitorProcessID : {0}", TargetProcessInfo.ID );
+            _mainForm.PrintAndWriteFileWithTime(tempText);
 
-            TempText = String.Format("m_TargetMonitorProcessFullPath : {0}", m_TargetProcessInfo.FullPath);
-            m_MainForm.PrintAndWriteFileWithTime(TempText);
+            tempText = String.Format("TargetMonitorProcessFullPath : {0}", TargetProcessInfo.FullPath );
+            _mainForm.PrintAndWriteFileWithTime(tempText);
         }
 
         public void SaveMonitorProcessInfo()
         {
-            Properties.Settings.Default.MonitorProcessName = m_TargetProcessInfo.Name;
-            Properties.Settings.Default.MonitorProcessFullName = m_TargetProcessInfo.FullPath;
+            Properties.Settings.Default.MonitorProcessName = TargetProcessInfo.Name;
+            Properties.Settings.Default.MonitorProcessFullName = TargetProcessInfo.FullPath;
             Properties.Settings.Default.Save();
         }
 
-        public void SaveMonitorProcessInfo(Process MonitorProcess)
+        public void SaveMonitorProcessInfo( Process MonitorProcess )
         {
-            ProcessModule CurProcessModule = MonitorProcess.MainModule;
-            SetTargetMonitorProcessInfo(MonitorProcess.ProcessName, MonitorProcess.Id.ToString(), CurProcessModule.FileName);
-            m_RunningMonitorProcess = true;
+            SetTargetMonitorProcessInfo( MonitorProcess.Id.ToString(),
+                                         MonitorProcess.ProcessName, 
+                                         MonitorProcess.MainModule.FileName );
 
+            _runningMonitorProcess = true;
             SaveMonitorProcessInfo();
-
-            //Properties.Settings.Default.MonitorProcessName = MonitorProcess.ProcessName;
-            //Properties.Settings.Default.MonitorProcessFullName = CurProcessModule.FileName;
-            //Properties.Settings.Default.Save();
         }
 
-        public volatile bool _RunningMonitorThread = false;
-        private static void MonitorProcessWorker(object Args)
+        public volatile bool _runningMonitorThread = false;
+        private static void MonitorProcessWorker( object Args )
         {
-            ProcessMonitorManager CurrentObject = (ProcessMonitorManager)Args;
-            MainForm CurrentForm = CurrentObject.m_MainForm;
-            CurrentObject.m_MainForm.PrintAndWriteFileWithTime("Entry MonitorProcessWorker Thread.");
+            ProcessMonitorManager appManager = (ProcessMonitorManager)Args;
+            MainForm CurrentForm = appManager._mainForm;
+            appManager._mainForm.PrintAndWriteFileWithTime( "Entry MonitorProcessWorker Thread." );
 
-            while (true == CurrentObject._RunningMonitorThread)
+            while( true == appManager._runningMonitorThread )
             {
                 try
                 {
-                    CurrentObject.m_RunningMonitorProcess = false;
+                    appManager._runningMonitorProcess = false;
 
                     Process[] Processlist = Process.GetProcesses();
-                    foreach (Process CurProcess in Processlist)
+                    foreach( Process CurProcess in Processlist )
                     {
                         // FullPath로 확인한다. 이름이 같아도 FullPath가 다르면 별개의 프로세스로 판단한다.
-                        if (true == CurrentObject.m_ExistPrevMonitorProcess && CurProcess.ProcessName == CurrentObject.m_TargetProcessInfo.Name)
+                        if( true == appManager._existPrevMonitorProcess && 
+                                    CurProcess.ProcessName == appManager.TargetProcessInfo.Name)
                         {
                             string curProcessFullPath = CurProcess.Modules[0].FileName;
-                            if (0 == string.Compare(curProcessFullPath, CurrentObject.m_TargetProcessInfo.FullPath))
+                            if (0 == string.Compare(curProcessFullPath, appManager.TargetProcessInfo.FullPath))
                             {
-                                g_TargetProcess = CurProcess;
-                                CurrentObject.m_RunningMonitorProcess = true;
-                                CurrentObject.SaveMonitorProcessInfo(g_TargetProcess);
+                                TargetProcess = CurProcess;
+                                appManager._runningMonitorProcess = true;
+                                appManager.SaveMonitorProcessInfo( TargetProcess );
                                 
                                 break;
                             }
                         }
                         else
                         {
-                            if (CurProcess.ProcessName == CurrentObject.m_TargetProcessInfo.Name)
+                            if( CurProcess.ProcessName == appManager.TargetProcessInfo.Name )
                             {
                                 string curProcessFullPath = CurProcess.Modules[0].FileName;
-                                if (0 == string.Compare(curProcessFullPath, CurrentObject.m_TargetProcessInfo.FullPath))
+                                if( 0 == string.Compare(curProcessFullPath, appManager.TargetProcessInfo.FullPath) )
                                 {
                                     // Running Process is true.
-                                    g_TargetProcess = CurProcess;
-                                    CurrentObject.m_RunningMonitorProcess = true;
+                                    TargetProcess = CurProcess;
+                                    appManager._runningMonitorProcess = true;
 
-                                    CurrentObject.SaveMonitorProcessInfo(g_TargetProcess);
+                                    appManager.SaveMonitorProcessInfo( TargetProcess );
                                     break;
                                 }
                             }
                         }
                     }
 
-                    if( true == CurrentObject.m_RunningMonitorProcess )
+                    if( true == appManager._runningMonitorProcess )
                     {
-                        string InfoText = String.Format("Process {0} is Running!!!", CurrentObject.m_TargetProcessInfo.Name);
+                        string InfoText = String.Format( "Process {0} is Running!!!", appManager.TargetProcessInfo.Name );
                     }
-                    else if (false == CurrentObject.m_RunningMonitorProcess)
+                    else if (false == appManager._runningMonitorProcess)
                     {
-                        string strText = String.Format("Process {0} is not Running. now Try Running Process!!!!", CurrentObject.m_TargetProcessInfo.Name);
+                        string strText = String.Format( "Process {0} is not Running. now Try Running Process!!!!", 
+                                                        appManager.TargetProcessInfo.Name);
+
                         CurrentForm.PrintAndWriteFileWithTime(strText);
 
                         // Force Running Process.
-                        strText = String.Format("Start Running Process!! [{0}], {1}]", CurrentObject.m_TargetProcessInfo.FullPath, CurrentObject.m_TargetProcessInfo.Name);
+                        strText = String.Format( "Start Running Process!! [{0}], {1}]", 
+                                                appManager.TargetProcessInfo.FullPath, appManager.TargetProcessInfo.Name);
+
                         CurrentForm.PrintAndWriteFileWithTime(strText);
 
-                        string titleBarText = string.Format("{0}", CurrentObject.m_TargetProcessInfo.FullPath);
+                        string titleBarText = string.Format("{0}", appManager.TargetProcessInfo.FullPath);
                         CurrentForm.AppendToMainTitleBarText(ref titleBarText);
                         
                         string WorkingDirectory = System.IO.Directory.GetCurrentDirectory();
 
-                        string PathReplace = CurrentObject.m_TargetProcessInfo.FullPath.Replace(CurrentObject.m_TargetProcessInfo.Name, "");
-                        string PathOnly = PathReplace.Replace(".exe", "");
+                        string PathOnly = AprilUtility.RemoveExeFileName( appManager.TargetProcessInfo.FullPath,
+                                                                          appManager.TargetProcessInfo.Name );
 
-                        System.IO.Directory.SetCurrentDirectory(PathOnly);
-                        Process MonitorProcess = Process.Start(CurrentObject.m_TargetProcessInfo.FullPath);
-
-
-                        if( true == System.IO.Directory.Exists( Properties.Settings.Default.SendMailDir) )
+                        if( "" != PathOnly )
                         {
-                            CurrentForm.PrintAndWriteFileWithTime("Send mail to Developer's Using python");
+                            System.IO.Directory.SetCurrentDirectory( PathOnly );
+                            Process MonitorProcess = Process.Start( appManager.TargetProcessInfo.FullPath );
 
-                            // 서버가 죽었다고 메일을 보낸다. sendmail.py를 활용한다.
-                            string mailSubject = string.Format("\"Crash Server Process {0}({1})\"",
-                                                                CurrentObject.m_TargetProcessInfo.FullPath,
-                                                                CurrentObject.m_TargetProcessInfo.Name);
-
-
-                            string sendMailProcessName = "C:\\Python27\\python.exe";
-
-                            ProcessStartInfo pythonProcessInfo = new ProcessStartInfo();
-                            pythonProcessInfo.CreateNoWindow = true;
-                            pythonProcessInfo.UseShellExecute = false;
-                            pythonProcessInfo.FileName = sendMailProcessName;
-                            pythonProcessInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                            pythonProcessInfo.Arguments =  "SendMail.py " + mailSubject;
-                            using (Process SendMailProcess = Process.Start(pythonProcessInfo))
+                            if ( true == Properties.Settings.Default.IsSendMail )
                             {
-                                SendMailProcess.WaitForExit();
+                                if ( true == System.IO.Directory.Exists( Properties.Settings.Default.SendMailDir ) )
+                                {
+                                    CurrentForm.PrintAndWriteFileWithTime( "Send mail to Developer's Using python" );
+
+                                    // 서버가 죽었다고 메일을 보낸다. sendmail.py를 활용한다.
+                                    string mailSubject = string.Format( "\"Crash Server Process {0}({1})\"",
+                                                                        appManager.TargetProcessInfo.FullPath,
+                                                                        appManager.TargetProcessInfo.Name );
+
+
+                                    string sendMailProcessName = "C:\\Python27\\python.exe";
+
+                                    ProcessStartInfo pythonProcessInfo = new ProcessStartInfo();
+                                    pythonProcessInfo.CreateNoWindow = true;
+                                    pythonProcessInfo.UseShellExecute = false;
+                                    pythonProcessInfo.FileName = sendMailProcessName;
+                                    pythonProcessInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                                    pythonProcessInfo.Arguments = "SendMail.py " + mailSubject;
+                                    using ( Process SendMailProcess = Process.Start( pythonProcessInfo ) )
+                                    {
+                                        SendMailProcess.WaitForExit();
+                                    }
+
+                                    CurrentForm.PrintAndWriteFileWithTime( "Complete to Send " );
+                                }
                             }
 
-                            CurrentForm.PrintAndWriteFileWithTime("Complete to Send ");
+                            System.IO.Directory.SetCurrentDirectory( WorkingDirectory );
+                            if ( MonitorProcess.ProcessName == appManager.TargetProcessInfo.Name )
+                            {
+                                appManager.SaveMonitorProcessInfo( MonitorProcess );
+                                strText = String.Format( "Success to Run Process [{0}]", appManager.TargetProcessInfo.Name );
+                                CurrentForm.PrintAndWriteFileWithTime( strText );
+                            }
                         }
-
-                        
-                        System.IO.Directory.SetCurrentDirectory(WorkingDirectory);
-                        if (MonitorProcess.ProcessName == CurrentObject.m_TargetProcessInfo.Name)
+                        else
                         {
-                            CurrentObject.SaveMonitorProcessInfo(MonitorProcess);
-                            strText = String.Format("Success to Run Process [{0}]", CurrentObject.m_TargetProcessInfo.Name);
-                            CurrentForm.PrintAndWriteFileWithTime(strText);
+                            strText = String.Format( "Not Exist FullPath Directory [{0}]", appManager.TargetProcessInfo.Name );
+                            CurrentForm.PrintAndWriteFileWithTime( strText );
                         }
                     }
                 }
-                catch (System.Exception ex)
+                catch( System.Exception ex )
                 {
                     CurrentForm.PrintAndWriteFileWithTime(ex.Message);
                 }
 
-                Thread.Sleep(2000);
+                Thread.Sleep( 2000 );
             }
         }
 
         public void StartMonitorProcessWorkerThread()
         {
-            if (false == _RunningMonitorThread)
+            if( false == _runningMonitorThread )
             {
-                _RunningMonitorThread = true;
-                Thread MonitorThread = new Thread(new ParameterizedThreadStart(MonitorProcessWorker));
-                MonitorThread.Start((object)this);
+                _runningMonitorThread = true;
+                var MonitorThread = new Thread( new ParameterizedThreadStart( MonitorProcessWorker ) );
+                MonitorThread.Start( (object)this );
             }
         }
-
     }
 }
