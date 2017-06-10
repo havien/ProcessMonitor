@@ -1,6 +1,6 @@
 ProcessMonitor
 ==============
-Monitor to Selected the Process Running on Windows System, if crash Process, re-execute Process<br />
+Monitor to Selected the Process Running on Windows System, if Terminate or Crash Process, re-execute Process<br />
 윈도우 시스템에서 동작하는 선택된 프로세스를 감시한다. 만약 감시 중인 프로세스가 크래쉬하거나 종료하면 다시 실행한다.<br />
 Windowsのシステムの中で実行しているターゲットプロセスを監視する。もし、監視しているプロセスが終了したりクラッシュすると再びプロセスを実行する<p>
 
